@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/user_model.dart';
+import 'package:mozz_task/services/user_service.dart';
 import 'package:mozz_task/views/chat_view.dart';
 
 class MainView extends StatefulWidget {
@@ -11,16 +12,27 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  final List<User> chatUsers = UserService.instance!.chatUsers;
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Column(
         children: [
-          Header(),
-          SizedBox(height: 16),
-          Divider(color: lightGrey),
-          ChatList()
+          const Header(),
+          const SizedBox(height: 16),
+          const Divider(color: lightGrey),
+          chatUsers.isEmpty
+              ? const Text(
+                  "Еще нет чатов",
+                  style: TextStyle(
+                      color: grey,
+                      fontFamily: 'Gilroy',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 20),
+                )
+              : ChatList(chatUsers)
         ],
       ),
     );
@@ -105,17 +117,21 @@ class _HeaderState extends State<Header> {
 }
 
 class ChatList extends StatefulWidget {
-  const ChatList({super.key});
+  final List<User> chatUsers;
+  const ChatList(this.chatUsers, {super.key});
 
   @override
   State<ChatList> createState() => _ChatListState();
 }
 
 class _ChatListState extends State<ChatList> {
-  final chatUsers = [
-    const User(id: 2, name: "Виктор", surname: 'Власов', online: true),
-    const User(id: 1, name: "Акнур", surname: 'Каппарова', online: true),
-  ];
+  late final List<User> chatUsers;
+
+  @override
+  void initState() {
+    chatUsers = widget.chatUsers;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,17 +140,19 @@ class _ChatListState extends State<ChatList> {
         ElevatedButton(
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.all(Colors.black),
-            backgroundColor: MaterialStateProperty.all(Colors.transparent), // No background color
-            shadowColor: MaterialStateProperty.all(Colors.transparent), // No shadow
+            backgroundColor: MaterialStateProperty.all(
+                Colors.transparent), // No background color
+            shadowColor:
+                MaterialStateProperty.all(Colors.transparent), // No shadow
             elevation: MaterialStateProperty.all(0), // No elevation
-            padding: MaterialStateProperty.all(EdgeInsets.zero), 
+            padding: MaterialStateProperty.all(EdgeInsets.zero),
             // No padding
           ),
           onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ChatView(chatUser)),
-              );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChatView(chatUser)),
+            );
           },
           child: ChatListItem(chatUser),
         )
@@ -203,8 +221,7 @@ class _ChatListItemState extends State<ChatListItem> {
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17)),
-                        Row(
-                          children: [
+                        Row(children: [
                           Text(
                             "Вы: ",
                             style: const TextStyle(

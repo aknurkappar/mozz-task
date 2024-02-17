@@ -25,7 +25,7 @@ class _ChatViewState extends State<ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      children: [ChatHeader(chatUser), MessageInputWidget()],
+      children: [ChatHeader(chatUser), ChatBody(), MessageInputWidget()],
     ));
   }
 }
@@ -69,7 +69,7 @@ class _ChatHeaderState extends State<ChatHeader> {
                                   width: 30)),
                           color: Colors.black,
                           onPressed: () {
-                            // ...
+                            Navigator.pop(context);
                           }),
                       Container(
                         height: 60,
@@ -148,6 +148,9 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
     return Column(
       children: [
         const Divider(color: lightGrey),
+        Padding(
+          padding: EdgeInsets.all(20.0),
+          child:
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -178,15 +181,13 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                 fillColor: lightGrey,
                 border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(12.0)
-                    ),
+                    borderRadius: BorderRadius.circular(12.0)),
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.transparent),
                     borderRadius: BorderRadius.circular(12.0)),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent),
-                   borderRadius: BorderRadius.circular(12.0)
-                ),
+                    borderSide: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(12.0)),
                 contentPadding: EdgeInsets.all(10.0),
                 hintText: "Сообщение",
                 hintStyle: TextStyle(
@@ -214,7 +215,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                       // ...
                     }))
           ],
-        )
+        ))
       ],
     );
   }
@@ -230,6 +231,13 @@ class ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
-    return Text("messages");
+    return Expanded(
+      child: ListView(
+        children: [ 
+          for(int i = 0; i < 100; i++)
+          Text("$i")
+
+      ])
+    );
   }
 }
