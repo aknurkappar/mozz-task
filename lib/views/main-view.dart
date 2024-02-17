@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/user_model.dart';
@@ -29,13 +30,13 @@ class _MainViewState extends State<MainView> {
           const SizedBox(height: 16),
           const Divider(color: lightGrey),
           StreamBuilder<List<User>>(
-              stream: UserService.instance!.getUsers(),
+              stream: UserService.instance?.getUsers(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Text('Something went wrong! ${snapshot.error}');
                 } else if (snapshot.hasData) {
                   final chatUsers = snapshot.data!;
-                  return Text("Here");
+                  return ChatList(chatUsers);
                 } else {
                   return const Text(
                     "Еще нет чатов",

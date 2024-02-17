@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class User {
-  final int id;
+  final String id;
   final String name;
   final String surname;
   final bool online;
@@ -10,11 +12,13 @@ class User {
       required this.surname,
       required this.online});
 
-
-  static User fromJson(Map<String, dynamic> json) => User(
-    id: json['id'],
-    name: json['name'],
-    surname: json['surname'],
-    online: json['online'],
-  );
+  factory User.fromFirebase(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return User(
+      id: doc.id,
+      name: data['name'] ?? '',
+      surname: data['surname'] ?? '',
+      online: data['online'] ?? '',
+    );
+  }
 }

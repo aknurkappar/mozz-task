@@ -1,14 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mozz_task/models/user_model.dart';
 
 class UserService {
   static UserService? _instance;
-
-  final List<User> chatUsers = [
-    const User(id: 2, name: "Виктор", surname: 'Власов', online: true),
-    const User(id: 1, name: "Акнур", surname: 'Каппарова', online: true),
-  ];
 
   static UserService? get instance {
     if (_instance == null) {
@@ -25,8 +19,10 @@ class UserService {
   }
 
   Stream<List<User>> getUsers() {
-    return FirebaseFirestore.instance.collection("users").snapshots().map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => User.fromJson(doc.data())).toList());
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference collection = firestore.collection('users');
+    return collection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => User.fromFirebase(doc)).toList();
+    });
   }
 }
