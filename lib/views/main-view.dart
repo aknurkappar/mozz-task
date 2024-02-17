@@ -12,7 +12,12 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  final List<User> chatUsers = UserService.instance!.chatUsers;
+  late final Stream<List<User>> chatUsers;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +28,25 @@ class _MainViewState extends State<MainView> {
           const Header(),
           const SizedBox(height: 16),
           const Divider(color: lightGrey),
-          chatUsers.isEmpty
-              ? const Text(
-                  "Еще нет чатов",
-                  style: TextStyle(
-                      color: grey,
-                      fontFamily: 'Gilroy',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 20),
-                )
-              : ChatList(chatUsers)
+          StreamBuilder<List<User>>(
+              stream: UserService.instance!.getUsers(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Something went wrong! ${snapshot.error}');
+                } else if (snapshot.hasData) {
+                  final chatUsers = snapshot.data!;
+                  return Text("Here");
+                } else {
+                  return const Text(
+                    "Еще нет чатов",
+                    style: TextStyle(
+                        color: grey,
+                        fontFamily: 'Gilroy',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 20),
+                  );
+                }
+              })
         ],
       ),
     );
