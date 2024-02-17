@@ -123,10 +123,12 @@ class _ChatListState extends State<ChatList> {
       for (var chatUser in chatUsers)
         ElevatedButton(
           style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all(Colors.black),
             backgroundColor: MaterialStateProperty.all(Colors.transparent), // No background color
             shadowColor: MaterialStateProperty.all(Colors.transparent), // No shadow
             elevation: MaterialStateProperty.all(0), // No elevation
-            padding: MaterialStateProperty.all(EdgeInsets.zero), // No padding
+            padding: MaterialStateProperty.all(EdgeInsets.zero), 
+            // No padding
           ),
           onPressed: () {
               Navigator.push(
@@ -201,8 +203,15 @@ class _ChatListItemState extends State<ChatListItem> {
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17)),
-                        Row(children: [
-                          Text("Вы: "),
+                        Row(
+                          children: [
+                          Text(
+                            "Вы: ",
+                            style: const TextStyle(
+                                fontFamily: 'Gilroy',
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14),
+                          ),
                           Text(
                             "Уже сделал?",
                             style: const TextStyle(
