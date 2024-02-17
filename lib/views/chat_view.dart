@@ -25,7 +25,7 @@ class _ChatViewState extends State<ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      children: [ChatHeader(chatUser)],
+      children: [ChatHeader(chatUser), MessageInputWidget()],
     ));
   }
 }
@@ -61,12 +61,12 @@ class _ChatHeaderState extends State<ChatHeader> {
                     children: [
                       IconButton(
                           icon: ColorFiltered(
-                            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                              colorFilter: const ColorFilter.mode(
+                                  Colors.black, BlendMode.srcIn),
                               child: Image.asset(
                                   'assets/icons/arrow_left_icon.png',
                                   height: 30,
-                                  width: 30
-                              )),
+                                  width: 30)),
                           color: Colors.black,
                           onPressed: () {
                             // ...
@@ -129,9 +129,94 @@ class MessageInputWidget extends StatefulWidget {
 }
 
 class _MessageInputWidgetState extends State<MessageInputWidget> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    _textController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Column(
+      children: [
+        const Divider(color: lightGrey),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Container(
+                decoration: const BoxDecoration(
+                    color: lightGrey,
+                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                child: IconButton(
+                    padding: const EdgeInsets.all(10),
+                    highlightColor: darkGrey,
+                    icon: ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Colors.black, BlendMode.srcIn),
+                        child: Image.asset("assets/icons/attach.png",
+                            height: 30, width: 30)),
+                    color: Colors.black,
+                    onPressed: () {
+                      // ...
+                    })),
+            const SizedBox(width: 16),
+            Expanded(
+                child: TextField(
+              controller: _textController,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: lightGrey,
+                border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(12.0)
+                    ),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.circular(12.0)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent),
+                   borderRadius: BorderRadius.circular(12.0)
+                ),
+                contentPadding: EdgeInsets.all(10.0),
+                hintText: "Сообщение",
+                hintStyle: TextStyle(
+                    color: grey,
+                    fontFamily: 'Gilroy',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 20),
+              ),
+            )),
+            const SizedBox(width: 16),
+            Container(
+                decoration: const BoxDecoration(
+                    color: lightGrey,
+                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                child: IconButton(
+                    padding: const EdgeInsets.all(10),
+                    highlightColor: darkGrey,
+                    icon: ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Colors.black, BlendMode.srcIn),
+                        child: Image.asset("assets/icons/audio.png",
+                            height: 30, width: 30)),
+                    color: Colors.black,
+                    onPressed: () {
+                      // ...
+                    }))
+          ],
+        )
+      ],
+    );
   }
 }
 
@@ -145,6 +230,6 @@ class ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Text("messages");
   }
 }
