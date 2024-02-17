@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/message_mode.dart';
@@ -16,11 +15,19 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   late final User chatUser;
+  late final TextEditingController _textController;
 
   @override
   void initState() {
     chatUser = widget.chatUser;
+    _textController = TextEditingController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 
   @override
@@ -30,7 +37,90 @@ class _ChatViewState extends State<ChatView> {
       children: [
         ChatHeader(chatUser),
         ChatBody(chatUser),
-        MessageInputWidget(chatUser)
+        Column(
+          children: [
+            const Divider(color: lightGrey),
+            Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(
+                        decoration: const BoxDecoration(
+                            color: lightGrey,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12.0))),
+                        child: IconButton(
+                            padding: const EdgeInsets.all(10),
+                            highlightColor: darkGrey,
+                            icon: ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                    Colors.black, BlendMode.srcIn),
+                                child: Image.asset("assets/icons/attach.png",
+                                    height: 30, width: 30)),
+                            color: Colors.black,
+                            onPressed: () {
+                              // ...
+                            })),
+                    const SizedBox(width: 16),
+                    Expanded(
+                        child: TextField(
+                      controller: _textController,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: lightGrey,
+                        border: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(12.0)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(12.0)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(12.0)),
+                        contentPadding: const EdgeInsets.all(10.0),
+                        hintText: "Сообщение",
+                        hintStyle: const TextStyle(
+                            color: grey,
+                            fontFamily: 'Gilroy',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 20),
+                      ),
+                    )),
+                    const SizedBox(width: 16),
+                    Container(
+                        decoration: const BoxDecoration(
+                            color: lightGrey,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12.0))),
+                        child: IconButton(
+                            padding: const EdgeInsets.all(10),
+                            highlightColor: darkGrey,
+                            icon: ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                    Colors.black, BlendMode.srcIn),
+                                child: Image.asset(
+                                    "assets/icons/Big_Arrow_right.png",
+                                    height: 30,
+                                    width: 30)),
+                            color: Colors.black,
+                            onPressed: () async {
+                              await MessageService.instance?.sendMessage(
+                                  secondUserId: chatUser.id,
+                                  text: _textController.text,
+                                  imageURl: '');
+                              _textController.clear();
+                              setState(() {});
+                            }))
+                  ],
+                ))
+          ],
+        )
       ],
     ));
   }
@@ -110,8 +200,8 @@ class _ChatHeaderState extends State<ChatHeader> {
                                   fontFamily: 'Gilroy',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17)),
-                          Text('В сети',
-                              style: const TextStyle(
+                          const Text('В сети',
+                              style: TextStyle(
                                   color: darkGrey,
                                   fontFamily: 'Gilroy',
                                   fontWeight: FontWeight.w300,
@@ -158,7 +248,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
       children: [
         const Divider(color: lightGrey),
         Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -188,17 +278,17 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                     filled: true,
                     fillColor: lightGrey,
                     border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
+                        borderSide: const BorderSide(color: Colors.transparent),
                         borderRadius: BorderRadius.circular(12.0)),
                     enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
+                        borderSide: const BorderSide(color: Colors.transparent),
                         borderRadius: BorderRadius.circular(12.0)),
                     focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
+                        borderSide: const BorderSide(color: Colors.transparent),
                         borderRadius: BorderRadius.circular(12.0)),
-                    contentPadding: EdgeInsets.all(10.0),
+                    contentPadding: const EdgeInsets.all(10.0),
                     hintText: "Сообщение",
-                    hintStyle: TextStyle(
+                    hintStyle: const TextStyle(
                         color: grey,
                         fontFamily: 'Gilroy',
                         fontWeight: FontWeight.w500,
@@ -226,6 +316,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                               secondUserId: chatUser.id,
                               text: _textController.text,
                               imageURl: '');
+                          _textController.clear();
                         }))
               ],
             ))
@@ -244,36 +335,36 @@ class ChatBody extends StatefulWidget {
 
 class _ChatBodyState extends State<ChatBody> {
   late final User chatUser;
+  late StreamSubscription<List<Message>> _messagesSubscription;
+  List<Message> _messages = [];
 
   @override
   void initState() {
     chatUser = widget.chatUser;
+    _messagesSubscription = MessageService.instance!
+        .getChatMessages(secondUserId: chatUser.id)
+        .listen(
+      (List<Message> messages) {
+        setState(() {
+              _messages = messages;
+        });      },
+      onError: (error) {},
+    );
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _messagesSubscription.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: StreamBuilder(
-            stream: MessageService.instance
-                ?.getChatMessages(secondUserId: chatUser.id),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text('Error occured, please, try again');
-              } else if (snapshot.hasData) {
-                final List<Message>? messages = snapshot.data;
-                return messages != null
-                    ? ListView(
-                        children: [
-                          for (var message in messages)
-                            MessageItem(message)
-                        ],
-                      )
-                    : const Text('Error occured, please, try again');
-              } else {
-                return const CircularProgressIndicator();
-              }
-            }));
+        child: ListView(
+      children: [for (var message in _messages) MessageItem(message)],
+    ));
   }
 }
 
@@ -297,12 +388,12 @@ class _MessageItemState extends State<MessageItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
-        decoration:
-            BoxDecoration(
-              color: lightGreenGradient,
-              borderRadius: BorderRadius.all(Radius.circular(30))
-            ),
-        child: Text('${message.text} ${message.time}', style: TextStyle(color: Colors.black)),);
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+          color: lightGreenGradient,
+          borderRadius: BorderRadius.all(Radius.circular(30))),
+      child: Text('${message.text} ${message.time}',
+          style: const TextStyle(color: Colors.black)),
+    );
   }
 }

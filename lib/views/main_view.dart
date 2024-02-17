@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/user_model.dart';
@@ -236,17 +235,17 @@ class _ChatListItemState extends State<ChatListItem> {
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17)),
-                        Row(children: [
+                        const Row(children: [
                           Text(
                             "Вы: ",
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.w400,
                                 fontSize: 14),
                           ),
                           Text(
                             "Уже сделал?",
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: darkGrey,
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.w300,
@@ -257,9 +256,9 @@ class _ChatListItemState extends State<ChatListItem> {
                     )
                   ],
                 ),
-                Text(
+                const Text(
                   "Вчера",
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: darkGrey,
                       fontFamily: 'Gilroy',
                       fontWeight: FontWeight.w300,
