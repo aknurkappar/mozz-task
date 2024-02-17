@@ -9,4 +9,12 @@ class User {
       required this.name,
       required this.surname,
       required this.online});
+
+
+  static User fromJson(Map<String, dynamic> json) => User(
+    id: json['id'],
+    name: json['name'],
+    surname: json['surname'],
+    online: json['online'],
+  );
 }

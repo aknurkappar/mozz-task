@@ -16,4 +16,14 @@ class Message {
       required this.imageURL,
       required this.seen
       });
+
+  static Message fromJson(Map<String, dynamic> json) => Message(
+    id: json['id'],
+    senderId: json['senderId'],
+    receiverId: json['receiverId'],
+    dateTime: json['dateTime'],
+    text: json['text'],
+    imageURL: json['imageURL'],
+    seen: json['seen'],
+  );
 }

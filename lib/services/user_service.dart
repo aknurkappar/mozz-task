@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mozz_task/models/user_model.dart';
 
 class UserService{
@@ -20,5 +22,11 @@ class UserService{
 
   initialize() {
     _instance = UserService._();
+  }
+
+  static Stream<List<User>> getUsers() {
+    return FirebaseFirestore.instance.collection("users").snapshots().map(
+        (snapshot) =>
+            snapshot.docs.map((doc) => User.fromJson(doc.data())).toList());
   }
 }
