@@ -2,7 +2,7 @@ class User {
   final int id;
   final String name;
   final String surname;
-  final String online;
+  final bool online;
 
   const User(
       {required this.id,
