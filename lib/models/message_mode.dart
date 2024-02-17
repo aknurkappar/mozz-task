@@ -5,6 +5,7 @@ class Message {
   final String senderId;
   final String receiverId;
   final String time;
+  final String date;
   final String text;
   final String imageURL;
   final bool seen;
@@ -14,6 +15,7 @@ class Message {
       required this.senderId,
       required this.receiverId,
       required this.time,
+      required this.date,
       required this.text,
       required this.imageURL,
       required this.seen
@@ -25,7 +27,8 @@ class Message {
       id: doc.id,
       senderId: data['senderId'] ?? '',
       receiverId: data['receiverId'] ?? '',
-      time: data['dateTime'] ?? '',
+      time: data['time'] ?? '',
+      date: data['date'] ?? '',
       text: data['text'] ?? '',
       imageURL: data['imageURL'] ?? '',
       seen: data['seen'] ?? false, 

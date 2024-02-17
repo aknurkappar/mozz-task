@@ -20,8 +20,7 @@ class MessageService {
     _instance = MessageService._();
   }
 
-  Stream<List<Message>> getChatMessages(
-      {required String secondUserId}) {
+  Stream<List<Message>> getChatMessages({required String secondUserId}) {
     // get list of messages current user or another user in chat send/recieved from each other
     String? currentUserId;
     UserService.instance
@@ -72,7 +71,8 @@ class MessageService {
       'receiverId': secondUserId,
       'text': text,
       'imageURl': imageURl,
-      'time': DateTime.now(),
+      'time': '${DateTime.now().hour}:${DateTime.now().minute}',
+      'date': '${DateTime.now().month}, ${DateTime.now().day}, ${DateTime.now().year}',
       'seen': false
     });
   }

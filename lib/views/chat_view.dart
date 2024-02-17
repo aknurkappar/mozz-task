@@ -259,20 +259,50 @@ class _ChatBodyState extends State<ChatBody> {
                 ?.getChatMessages(secondUserId: chatUser.id),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Text('Error occured, please, try again');
+                return const Text('Error occured, please, try again');
               } else if (snapshot.hasData) {
                 final List<Message>? messages = snapshot.data;
                 return messages != null
                     ? ListView(
                         children: [
                           for (var message in messages)
-                            Text('${message.text} is here')
+                            MessageItem(message)
                         ],
                       )
-                    : Text('Error occured, please, try again');
+                    : const Text('Error occured, please, try again');
               } else {
-                return Text('Error occured, please, try again');
+                return const CircularProgressIndicator();
               }
             }));
+  }
+}
+
+class MessageItem extends StatefulWidget {
+  final Message message;
+  const MessageItem(this.message, {super.key});
+
+  @override
+  State<MessageItem> createState() => _MessageItemState();
+}
+
+class _MessageItemState extends State<MessageItem> {
+  late final Message message;
+
+  @override
+  void initState() {
+    message = widget.message;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+        decoration:
+            BoxDecoration(
+              color: lightGreenGradient,
+              borderRadius: BorderRadius.all(Radius.circular(30))
+            ),
+        child: Text('${message.text} ${message.time}', style: TextStyle(color: Colors.black)),);
   }
 }
