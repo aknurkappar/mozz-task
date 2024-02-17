@@ -1,9 +1,5 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/widgets.dart';
-import 'package:mozz_task/firebase_options.dart';
 import 'package:mozz_task/models/user_model.dart';
 
 class UserService {
@@ -24,14 +20,23 @@ class UserService {
   }
 
   Stream<List<User>> getUsers() {
+    // get all users except current user 
+    String? currentUserId;
+    UserService.instance
+        ?.getCurrentUserId()
+        .then((value) => currentUserId = value!);
+
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference collection = firestore.collection('users');
     return collection.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => User.fromFirebase(doc)).toList();
+      return snapshot.docs
+      .where((doc) => doc.id != currentUserId)
+      .map((doc) => User.fromFirebase(doc)).toList();
     });
   }
 
   Future<String?> getCurrentUserId() async {
+    // get current user, in our case who has name 'Акнур'
     try {
       late final String id;
       await FirebaseFirestore.instance

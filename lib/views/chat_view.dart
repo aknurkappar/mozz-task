@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
+import 'package:mozz_task/models/message_mode.dart';
 import 'package:mozz_task/models/user_model.dart';
 import 'package:mozz_task/services/message_service.dart';
 
@@ -26,7 +27,11 @@ class _ChatViewState extends State<ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      children: [ChatHeader(chatUser), ChatBody(), MessageInputWidget(chatUser)],
+      children: [
+        ChatHeader(chatUser),
+        ChatBody(chatUser),
+        MessageInputWidget(chatUser)
+      ],
     ));
   }
 }
@@ -230,16 +235,44 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
 }
 
 class ChatBody extends StatefulWidget {
-  const ChatBody({super.key});
+  final User chatUser;
+  const ChatBody(this.chatUser, {super.key});
 
   @override
   State<ChatBody> createState() => _ChatBodyState();
 }
 
 class _ChatBodyState extends State<ChatBody> {
+  late final User chatUser;
+
+  @override
+  void initState() {
+    chatUser = widget.chatUser;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: ListView(children: [for (int i = 0; i < 100; i++) Text("$i")]));
+        child: StreamBuilder(
+            stream: MessageService.instance
+                ?.getChatMessages(secondUserId: chatUser.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error occured, please, try again');
+              } else if (snapshot.hasData) {
+                final List<Message>? messages = snapshot.data;
+                return messages != null
+                    ? ListView(
+                        children: [
+                          for (var message in messages)
+                            Text('${message.text} is here')
+                        ],
+                      )
+                    : Text('Error occured, please, try again');
+              } else {
+                return Text('Error occured, please, try again');
+              }
+            }));
   }
 }
