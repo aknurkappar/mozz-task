@@ -48,52 +48,51 @@ class _HeaderState extends State<Header> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Chats",
+              "Чаты",
               style: TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.w500,
+                fontSize: 36,
+                fontWeight: FontWeight.w900,
                 fontFamily: 'Gilroy',
               ),
             ),
             Container(
                 padding: const EdgeInsets.only(
-                    left: 20, right: 20, top: 5, bottom: 5),
+                    left: 10, right: 10, top: 5, bottom: 5),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius: BorderRadius.circular(12.0),
                     color: lightGray),
                 child: Row(
-                  children: [
+                
+                 children: [
                     const ImageIcon(AssetImage("assets/icons/search_icon.png"),
                         color: darkGray, size: 30),
                     Expanded(
-                        child: TextField(
+                      child: TextField(
                       controller: _searchTextController,
-                      obscureText: true,
                       enableSuggestions: false,
                       autocorrect: false,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide:
-                                const BorderSide(color: Colors.transparent)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                            borderSide:
-                                const BorderSide(color: Colors.transparent)),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
                           borderSide:
-                              const BorderSide(color: Colors.transparent),
+                                 BorderSide(color: Colors.transparent)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                 BorderSide(color: Colors.transparent)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                               BorderSide(color: Colors.transparent),
                           // Border color when TextField is focused
                         ),
-                        contentPadding: const EdgeInsets.all(20.0),
-                        hintText: "Search",
-                        hintStyle: const TextStyle(color: darkGray),
+                        contentPadding:  EdgeInsets.all(10.0),
+                        hintText: "Поиск",
+                        hintStyle:  TextStyle(
+                          color: darkGray,
+                          fontFamily: 'Gilroy',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 20
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w200,
-                        fontFamily: 'Gilroy',
-                      ),
+  
                     ))
                   ],
                 ))
