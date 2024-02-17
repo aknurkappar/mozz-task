@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/user_model.dart';
+import 'package:mozz_task/services/message_service.dart';
 
 class ChatView extends StatefulWidget {
   final User chatUser;
@@ -25,7 +26,7 @@ class _ChatViewState extends State<ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      children: [ChatHeader(chatUser), ChatBody(), MessageInputWidget()],
+      children: [ChatHeader(chatUser), ChatBody(), MessageInputWidget(chatUser)],
     ));
   }
 }
@@ -122,7 +123,8 @@ class _ChatHeaderState extends State<ChatHeader> {
 }
 
 class MessageInputWidget extends StatefulWidget {
-  const MessageInputWidget({super.key});
+  final User chatUser;
+  const MessageInputWidget(this.chatUser, {super.key});
 
   @override
   State<MessageInputWidget> createState() => _MessageInputWidgetState();
@@ -130,9 +132,11 @@ class MessageInputWidget extends StatefulWidget {
 
 class _MessageInputWidgetState extends State<MessageInputWidget> {
   late final TextEditingController _textController;
+  late final User chatUser;
 
   @override
   void initState() {
+    chatUser = widget.chatUser;
     _textController = TextEditingController();
     super.initState();
   }
@@ -149,73 +153,77 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
       children: [
         const Divider(color: lightGrey),
         Padding(
-          padding: EdgeInsets.all(20.0),
-          child:
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Container(
-                decoration: const BoxDecoration(
-                    color: lightGrey,
-                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                child: IconButton(
-                    padding: const EdgeInsets.all(10),
-                    highlightColor: darkGrey,
-                    icon: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                            Colors.black, BlendMode.srcIn),
-                        child: Image.asset("assets/icons/attach.png",
-                            height: 30, width: 30)),
-                    color: Colors.black,
-                    onPressed: () {
-                      // ...
-                    })),
-            const SizedBox(width: 16),
-            Expanded(
-                child: TextField(
-              controller: _textController,
-              enableSuggestions: false,
-              autocorrect: false,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: lightGrey,
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(12.0)),
-                enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(12.0)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(12.0)),
-                contentPadding: EdgeInsets.all(10.0),
-                hintText: "Сообщение",
-                hintStyle: TextStyle(
-                    color: grey,
-                    fontFamily: 'Gilroy',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20),
-              ),
-            )),
-            const SizedBox(width: 16),
-            Container(
-                decoration: const BoxDecoration(
-                    color: lightGrey,
-                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                child: IconButton(
-                    padding: const EdgeInsets.all(10),
-                    highlightColor: darkGrey,
-                    icon: ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                            Colors.black, BlendMode.srcIn),
-                        child: Image.asset("assets/icons/audio.png",
-                            height: 30, width: 30)),
-                    color: Colors.black,
-                    onPressed: () {
-                      // ...
-                    }))
-          ],
-        ))
+            padding: EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                    decoration: const BoxDecoration(
+                        color: lightGrey,
+                        borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    child: IconButton(
+                        padding: const EdgeInsets.all(10),
+                        highlightColor: darkGrey,
+                        icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.black, BlendMode.srcIn),
+                            child: Image.asset("assets/icons/attach.png",
+                                height: 30, width: 30)),
+                        color: Colors.black,
+                        onPressed: () {
+                          // ...
+                        })),
+                const SizedBox(width: 16),
+                Expanded(
+                    child: TextField(
+                  controller: _textController,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: lightGrey,
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                        borderRadius: BorderRadius.circular(12.0)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                        borderRadius: BorderRadius.circular(12.0)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                        borderRadius: BorderRadius.circular(12.0)),
+                    contentPadding: EdgeInsets.all(10.0),
+                    hintText: "Сообщение",
+                    hintStyle: TextStyle(
+                        color: grey,
+                        fontFamily: 'Gilroy',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 20),
+                  ),
+                )),
+                const SizedBox(width: 16),
+                Container(
+                    decoration: const BoxDecoration(
+                        color: lightGrey,
+                        borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    child: IconButton(
+                        padding: const EdgeInsets.all(10),
+                        highlightColor: darkGrey,
+                        icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.black, BlendMode.srcIn),
+                            child: Image.asset(
+                                "assets/icons/Big_Arrow_right.png",
+                                height: 30,
+                                width: 30)),
+                        color: Colors.black,
+                        onPressed: () async {
+                          await MessageService.instance?.sendMessage(
+                              secondUserId: chatUser.id,
+                              text: _textController.text,
+                              imageURl: '');
+                        }))
+              ],
+            ))
       ],
     );
   }
@@ -232,12 +240,6 @@ class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView(
-        children: [ 
-          for(int i = 0; i < 100; i++)
-          Text("$i")
-
-      ])
-    );
+        child: ListView(children: [for (int i = 0; i < 100; i++) Text("$i")]));
   }
 }
