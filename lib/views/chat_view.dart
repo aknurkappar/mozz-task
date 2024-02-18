@@ -335,42 +335,65 @@ class ChatBody extends StatefulWidget {
 
 class _ChatBodyState extends State<ChatBody> {
   late final User chatUser;
-  late StreamSubscription<List<Message>> _messagesSubscription;
-  List<Message> _messages = [];
+  late Stream<List<Message>> _chatMessagesStream;
 
   @override
   void initState() {
-    chatUser = widget.chatUser;
-    _messagesSubscription = MessageService.instance!
-        .getChatMessages(secondUserId: chatUser.id)
-        .listen(
-      (List<Message> messages) {
-        setState(() {
-              _messages = messages;
-        });      },
-      onError: (error) {},
-    );
     super.initState();
+    chatUser = widget.chatUser;
+    _initializeStream();
   }
 
-  @override
-  void dispose() {
-    _messagesSubscription.cancel();
-    super.dispose();
+  void _initializeStream() {
+    _chatMessagesStream = MessageService.instance!
+        .getChatMessages(secondUserId: widget.chatUser.id);
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: ListView(
-      children: [for (var message in _messages) MessageItem(message)],
-    ));
+        child: StreamBuilder<List<Message>>(
+            stream: _chatMessagesStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                const CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                return const Text('Error occured, please, try again');
+              }
+              if (snapshot.hasData) {
+                final List<Message>? messages = snapshot.data;
+                messages?.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+                // print('messages: ${messages?.length}');
+                return messages != null
+                    ? ListView.builder(
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      Message message = messages[index];
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                            color: (chatUser.id == message.senderId)
+                                ? Colors.white
+                                : lightGreenGradient,
+                            borderRadius: const BorderRadius.all(Radius.circular(30))),
+                        child: Text('${message.text} ${message.time}',
+                            style: const TextStyle(color: Colors.black)),
+                      );
+                    },
+                  )
+                    : const Text('Error occured, please, try again');
+              } else {
+                return const Text('Error occured, please, try again');
+              }
+            }));
   }
 }
 
 class MessageItem extends StatefulWidget {
   final Message message;
-  const MessageItem(this.message, {super.key});
+  final User chatUser;
+  const MessageItem(this.message, this.chatUser, {super.key});
 
   @override
   State<MessageItem> createState() => _MessageItemState();
@@ -378,10 +401,11 @@ class MessageItem extends StatefulWidget {
 
 class _MessageItemState extends State<MessageItem> {
   late final Message message;
-
+  late final User chatUser;
   @override
   void initState() {
     message = widget.message;
+    chatUser = widget.chatUser;
     super.initState();
   }
 
@@ -389,9 +413,11 @@ class _MessageItemState extends State<MessageItem> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-          color: lightGreenGradient,
-          borderRadius: BorderRadius.all(Radius.circular(30))),
+      decoration: BoxDecoration(
+          color: (chatUser.id == message.senderId)
+              ? Colors.white
+              : lightGreenGradient,
+          borderRadius: const BorderRadius.all(Radius.circular(30))),
       child: Text('${message.text} ${message.time}',
           style: const TextStyle(color: Colors.black)),
     );

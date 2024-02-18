@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:mozz_task/models/message_mode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mozz_task/services/user_service.dart';
+import 'package:rxdart/rxdart.dart';
 
 class MessageService {
   static MessageService? _instance;
@@ -20,41 +21,34 @@ class MessageService {
     _instance = MessageService._();
   }
 
-  Stream<List<Message>> getChatMessages({required String secondUserId}) {
+  Stream<List<Message>> getChatMessages({required String secondUserId}) async* {
     // get list of messages current user or another user in chat send/recieved from each other
-    String? currentUserId;
-    UserService.instance
-        ?.getCurrentUserId()
-        .then((value) => currentUserId = value);
+    String? currentUserId = await UserService.instance?.getCurrentUserId();
 
-    final streamController = StreamController<List<Message>>();
-    List<Message> mergedList = [];
-
-    FirebaseFirestore.instance
+    var receivedMessagesStream = FirebaseFirestore.instance
         .collection('messages')
         .where('receiverId', isEqualTo: currentUserId)
         .where('senderId', isEqualTo: secondUserId)
         .snapshots()
-        .listen((snapshot) {
-      final recievedMessages =
-          snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList();
-      mergedList.addAll(recievedMessages);
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
 
-    FirebaseFirestore.instance
+    var sentMessagesStream = FirebaseFirestore.instance
         .collection('messages')
         .where('receiverId', isEqualTo: secondUserId)
         .where('senderId', isEqualTo: currentUserId)
         .snapshots()
-        .listen((snapshot) {
-      final sendMessages =
-          snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList();
-      mergedList.addAll(sendMessages);
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
 
-    streamController.add(mergedList);
-
-    return streamController.stream;
+    await for (var combined in Rx.combineLatest2(
+        receivedMessagesStream,
+        sentMessagesStream,
+        (List<Message> received, List<Message> sent) => received
+          ..addAll(sent)
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)))) {
+      yield combined;
+    }
   }
 
   Future<void> sendMessage(
@@ -72,8 +66,10 @@ class MessageService {
       'text': text,
       'imageURl': imageURl,
       'time': '${DateTime.now().hour}:${DateTime.now().minute}',
-      'date': '${DateTime.now().month}, ${DateTime.now().day}, ${DateTime.now().year}',
-      'seen': false
+      'date':
+          '${DateTime.now().month}, ${DateTime.now().day}, ${DateTime.now().year}',
+      'seen': false,
+      'createdAt': FieldValue.serverTimestamp()
     });
   }
 }

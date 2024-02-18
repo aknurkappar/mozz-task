@@ -9,6 +9,7 @@ class Message {
   final String text;
   final String imageURL;
   final bool seen;
+  final Timestamp createdAt;
 
   const Message(
       {required this.id,
@@ -18,10 +19,11 @@ class Message {
       required this.date,
       required this.text,
       required this.imageURL,
-      required this.seen
-      });
+      required this.seen,
+      required this.createdAt
+    });
 
-    factory Message.fromFirebase(DocumentSnapshot doc) {
+  factory Message.fromFirebase(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
     return Message(
       id: doc.id,
@@ -31,8 +33,8 @@ class Message {
       date: data['date'] ?? '',
       text: data['text'] ?? '',
       imageURL: data['imageURL'] ?? '',
-      seen: data['seen'] ?? false, 
-
+      seen: data['seen'] ?? false,
+      createdAt: data['createdAt'] ?? ''
     );
   }
 }
