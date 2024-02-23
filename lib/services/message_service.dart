@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:mozz_task/models/message_mode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mozz_task/services/user_service.dart';
@@ -21,34 +22,59 @@ class MessageService {
     _instance = MessageService._();
   }
 
-  Stream<List<Message>> getChatMessages({required String secondUserId}) async* {
-    // get list of messages current user or another user in chat send/recieved from each other
-    String? currentUserId = await UserService.instance?.getCurrentUserId();
+  // Stream<List<Message>> getReceivedChatMessages1(
+  //     {required String secondUserId}) async* {
+  //   String? currentUserId = await UserService.instance?.getCurrentUserId();
+  //   yield* FirebaseFirestore.instance
+  //       .collection('messages')
+  //       .where('receiverId', isEqualTo: currentUserId)
+  //       .where('senderId', isEqualTo: secondUserId)
+  //       .orderBy('createdAt', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) =>
+  //           snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
+  // }
 
-    var receivedMessagesStream = FirebaseFirestore.instance
+  // Stream<List<Message>> getChatMessages(
+  //     {required String secondUserId}) async* {
+  //   String? currentUserId = await UserService.instance?.getCurrentUserId();
+  //   print("here");
+  //   yield* FirebaseFirestore.instance
+  //       .collection('messages')
+  //       .where('senderId', isEqualTo: currentUserId)
+  //       .where('receiverId', isEqualTo: secondUserId)
+  //       .orderBy('createdAt', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) =>
+  //           snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
+  // }
+
+  Stream<List<Message>> getReceivedChatMessages({
+    required String? currentUserId,
+    required String? secondUserId,
+  }) {
+    return FirebaseFirestore.instance
         .collection('messages')
         .where('receiverId', isEqualTo: currentUserId)
         .where('senderId', isEqualTo: secondUserId)
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
+  }
 
-    var sentMessagesStream = FirebaseFirestore.instance
+  Stream<List<Message>> getChatMessages({required String secondUserId}) async* {
+    String? currentUserId = await UserService.instance?.getCurrentUserId();
+    final chatIds = [
+      '${currentUserId}_$secondUserId',
+      '${secondUserId}_$currentUserId'
+    ];
+    yield* FirebaseFirestore.instance
         .collection('messages')
-        .where('receiverId', isEqualTo: secondUserId)
-        .where('senderId', isEqualTo: currentUserId)
+        .where('chatId', whereIn: chatIds)
+        .orderBy('createdAt', descending: false)
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
-
-    await for (var combined in Rx.combineLatest2(
-        receivedMessagesStream,
-        sentMessagesStream,
-        (List<Message> received, List<Message> sent) => received
-          ..addAll(sent)
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt)))) {
-      yield combined;
-    }
   }
 
   Future<void> sendMessage(
@@ -60,7 +86,10 @@ class MessageService {
     await UserService.instance?.getCurrentUserId().then((value) {
       currentUserId = value;
     });
+
+    final chatId = '${currentUserId}_$secondUserId';
     await FirebaseFirestore.instance.collection('messages').add({
+      'chatId': chatId,
       'senderId': currentUserId,
       'receiverId': secondUserId,
       'text': text,
@@ -68,8 +97,7 @@ class MessageService {
       'time': '${DateTime.now().hour}:${DateTime.now().minute}',
       'date':
           '${DateTime.now().month}, ${DateTime.now().day}, ${DateTime.now().year}',
-      'seen': false,
-      'createdAt': FieldValue.serverTimestamp()
+      'createdAt': '${DateTime.now()}'
     });
   }
 }

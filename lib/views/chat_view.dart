@@ -115,7 +115,6 @@ class _ChatViewState extends State<ChatView> {
                                   text: _textController.text,
                                   imageURl: '');
                               _textController.clear();
-                              setState(() {});
                             }))
                   ],
                 ))
@@ -353,38 +352,34 @@ class _ChatBodyState extends State<ChatBody> {
   Widget build(BuildContext context) {
     return Expanded(
         child: StreamBuilder<List<Message>>(
-            stream: _chatMessagesStream,
+            stream:_chatMessagesStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                const CircularProgressIndicator();
-              }
               if (snapshot.hasError) {
                 return const Text('Error occured, please, try again');
               }
               if (snapshot.hasData) {
                 final List<Message>? messages = snapshot.data;
-                messages?.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-                // print('messages: ${messages?.length}');
                 return messages != null
                     ? ListView.builder(
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      Message message = messages[index];
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                            color: (chatUser.id == message.senderId)
-                                ? Colors.white
-                                : lightGreenGradient,
-                            borderRadius: const BorderRadius.all(Radius.circular(30))),
-                        child: Text('${message.text} ${message.time}',
-                            style: const TextStyle(color: Colors.black)),
-                      );
-                    },
-                  )
-                    : const Text('Error occured, please, try again');
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          Message message = messages[index];
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                                color: (chatUser.id == message.senderId)
+                                    ? Colors.white
+                                    : lightGreenGradient,
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(30))),
+                            child: Text('${message.text} ${message.time}',
+                                style: const TextStyle(color: Colors.black)),
+                          );
+                        },
+                      )
+                    : const Text('No data');
               } else {
-                return const Text('Error occured, please, try again');
+                return const CircularProgressIndicator();
               }
             }));
   }
@@ -413,11 +408,14 @@ class _MessageItemState extends State<MessageItem> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          color: (chatUser.id == message.senderId)
-              ? Colors.white
-              : lightGreenGradient,
-          borderRadius: const BorderRadius.all(Radius.circular(30))),
+      decoration: chatUser.id == message.senderId ?
+      BoxDecoration(
+          color:Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(30)))
+          :  BoxDecoration(
+          color: lightGreenGradient,
+          borderRadius: const BorderRadius.all(Radius.circular(30)))
+          ,
       child: Text('${message.text} ${message.time}',
           style: const TextStyle(color: Colors.black)),
     );

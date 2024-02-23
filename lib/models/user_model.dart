@@ -18,7 +18,7 @@ class User {
       id: doc.id,
       name: data['name'] ?? '',
       surname: data['surname'] ?? '',
-      online: data['online'] ?? '',
+      online: data['online'],
     );
   }
 }
