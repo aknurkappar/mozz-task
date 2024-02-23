@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ffi';
 import 'package:mozz_task/models/message_mode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mozz_task/services/user_service.dart';
+import 'package:pair/pair.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MessageService {
@@ -75,6 +77,35 @@ class MessageService {
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => Message.fromFirebase(doc)).toList());
+  }
+
+  Stream<Pair<String, bool>> getLastMessage(
+      {required String secondUserId}) async* {
+    String? currentUserId = await UserService.instance?.getCurrentUserId();
+    Pair<String, bool> lastMessage = const Pair(" ", false);
+    final chatIds = [
+      '${currentUserId}_$secondUserId',
+      '${secondUserId}_$currentUserId'
+    ];
+    await FirebaseFirestore.instance
+        .collection('messages')
+        .where('chatId', whereIn: chatIds)
+        .orderBy('createdAt', descending: false)
+        .get()
+        .then((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final lastDoc = snapshot.docs.last;
+        print(snapshot.docs.last['text']);
+        final text = Message.fromFirebase(lastDoc).text;
+        final isSender =
+            Message.fromFirebase(lastDoc).senderId == currentUserId;
+        lastMessage = Pair(text, isSender);
+      } else {
+        print("no lastMessage");
+      }
+    });
+    print('${lastMessage.key} ${lastMessage.value}');
+    yield lastMessage;
   }
 
   Future<void> sendMessage(

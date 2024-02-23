@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mozz_task/constants/colors.dart';
 import 'package:mozz_task/models/user_model.dart';
+import 'package:mozz_task/services/message_service.dart';
 import 'package:mozz_task/services/user_service.dart';
 import 'package:mozz_task/views/chat_view.dart';
+import 'package:pair/pair.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -184,11 +186,18 @@ class ChatListItem extends StatefulWidget {
 
 class _ChatListItemState extends State<ChatListItem> {
   late final User chatUser;
+  late Stream<Pair<String, bool>> _lastMessageStream;
 
   @override
   void initState() {
     chatUser = widget.chatUser;
+    _initializeStream();
     super.initState();
+  }
+
+  void _initializeStream() {
+    _lastMessageStream = MessageService.instance!
+        .getLastMessage(secondUserId: widget.chatUser.id);
   }
 
   @override
@@ -211,16 +220,20 @@ class _ChatListItemState extends State<ChatListItem> {
                           gradient: LinearGradient(
                             begin: Alignment.topRight,
                             end: Alignment.bottomLeft,
-                            colors: (chatUser.avatar == 'green') ? [
-                              darkGreenGradient,
-                              lightGreenGradient,
-                            ] : (chatUser.avatar == 'blue') ? [
-                              darkBlueGradient,
-                              lightBlueGradient,
-                            ] : [
-                              darkRedGradient,
-                              lightRedGradient,
-                            ],
+                            colors: (chatUser.avatar == 'green')
+                                ? [
+                                    darkGreenGradient,
+                                    lightGreenGradient,
+                                  ]
+                                : (chatUser.avatar == 'blue')
+                                    ? [
+                                        darkBlueGradient,
+                                        lightBlueGradient,
+                                      ]
+                                    : [
+                                        darkRedGradient,
+                                        lightRedGradient,
+                                      ],
                           ),
                           borderRadius:
                               const BorderRadius.all(Radius.circular(30.0))),
@@ -241,23 +254,34 @@ class _ChatListItemState extends State<ChatListItem> {
                                 fontFamily: 'Gilroy',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17)),
-                        const Row(children: [
-                          Text(
-                            "Вы: ",
-                            style: TextStyle(
-                                fontFamily: 'Gilroy',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14),
-                          ),
-                          Text(
-                            "Уже сделал?",
-                            style: TextStyle(
-                                color: darkGrey,
-                                fontFamily: 'Gilroy',
-                                fontWeight: FontWeight.w300,
-                                fontSize: 14),
-                          )
-                        ])
+                        StreamBuilder(
+                            stream: _lastMessageStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Text(snapshot.error.toString());
+                              }
+                              if (snapshot.hasData) {
+                                return Row(children: [
+                                  Text(
+                                    (snapshot.data?.value == true ) ? "Вы: " : "",
+                                    style: const TextStyle(
+                                        fontFamily: 'Gilroy',
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14),
+                                  ),
+                                  Text(
+                                    '${snapshot.data?.key}',
+                                    style: const TextStyle(
+                                        color: darkGrey,
+                                        fontFamily: 'Gilroy',
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 14),
+                                  )
+                                ]);
+                              } else {
+                                return const Text('Loading...');
+                              }
+                            }),
                       ],
                     )
                   ],

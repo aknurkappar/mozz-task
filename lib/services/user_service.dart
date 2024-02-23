@@ -41,7 +41,7 @@ class UserService {
       late final String id;
       await FirebaseFirestore.instance
           .collection("users")
-          .where('name', isEqualTo: 'Акнур')
+          .where('name', isEqualTo: 'Алина')
           .get()
           .then((QuerySnapshot snapshot) {
         id = snapshot.docs[0].id;

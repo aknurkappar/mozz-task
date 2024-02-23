@@ -364,20 +364,9 @@ class _ChatBodyState extends State<ChatBody> {
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           Message message = messages[index];
-                          return (chatUser.id == message.senderId)
+                          return (chatUser.id == message.receiverId)
                               ? SentMessageItem(message)
                               : ReceivedMessageItem(message);
-                          // return Container(
-                          //   padding: const EdgeInsets.all(16),
-                          //   decoration: BoxDecoration(
-                          //       color: (chatUser.id == message.senderId)
-                          //           ? Colors.white
-                          //           : lightGreenGradient,
-                          //       borderRadius: const BorderRadius.all(
-                          //           Radius.circular(30))),
-                          //   child: Text('${message.text} ${message.time}',
-                          //       style: const TextStyle(color: Colors.black)),
-                          // );
                         },
                       )
                     : const Text('No data');
