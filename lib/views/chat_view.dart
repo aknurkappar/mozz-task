@@ -352,7 +352,7 @@ class _ChatBodyState extends State<ChatBody> {
   Widget build(BuildContext context) {
     return Expanded(
         child: StreamBuilder<List<Message>>(
-            stream:_chatMessagesStream,
+            stream: _chatMessagesStream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Error occured, please, try again');
@@ -364,60 +364,106 @@ class _ChatBodyState extends State<ChatBody> {
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           Message message = messages[index];
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                                color: (chatUser.id == message.senderId)
-                                    ? Colors.white
-                                    : lightGreenGradient,
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(30))),
-                            child: Text('${message.text} ${message.time}',
-                                style: const TextStyle(color: Colors.black)),
-                          );
+                          return (chatUser.id == message.senderId)
+                              ? SentMessageItem(message)
+                              : ReceivedMessageItem(message);
+                          // return Container(
+                          //   padding: const EdgeInsets.all(16),
+                          //   decoration: BoxDecoration(
+                          //       color: (chatUser.id == message.senderId)
+                          //           ? Colors.white
+                          //           : lightGreenGradient,
+                          //       borderRadius: const BorderRadius.all(
+                          //           Radius.circular(30))),
+                          //   child: Text('${message.text} ${message.time}',
+                          //       style: const TextStyle(color: Colors.black)),
+                          // );
                         },
                       )
                     : const Text('No data');
               } else {
-                return const CircularProgressIndicator();
+                return const Text('Loading...');
               }
             }));
   }
 }
 
-class MessageItem extends StatefulWidget {
+class SentMessageItem extends StatefulWidget {
   final Message message;
-  final User chatUser;
-  const MessageItem(this.message, this.chatUser, {super.key});
+  const SentMessageItem(this.message, {super.key});
 
   @override
-  State<MessageItem> createState() => _MessageItemState();
+  State<SentMessageItem> createState() => _SentMessageItemState();
 }
 
-class _MessageItemState extends State<MessageItem> {
+class _SentMessageItemState extends State<SentMessageItem> {
   late final Message message;
-  late final User chatUser;
   @override
   void initState() {
     message = widget.message;
-    chatUser = widget.chatUser;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: chatUser.id == message.senderId ?
-      BoxDecoration(
-          color:Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(30)))
-          :  BoxDecoration(
-          color: lightGreenGradient,
-          borderRadius: const BorderRadius.all(Radius.circular(30)))
-          ,
-      child: Text('${message.text} ${message.time}',
-          style: const TextStyle(color: Colors.black)),
-    );
+    return Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: lightGreenGradient,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: IntrinsicWidth(
+              // margin: const EdgeInsets.only(left: 20.0),
+              child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                Text('${message.text}   ${message.time} ',
+                    style: const TextStyle(color: Colors.black)),
+                Container(
+                    height: 14,
+                    width: 14,
+                    margin: const EdgeInsets.only(bottom: 2.0),
+                    child:
+                        const ImageIcon(AssetImage("assets/icons/Read.png"))),
+              ])),
+        ));
+  }
+}
+
+class ReceivedMessageItem extends StatefulWidget {
+  final Message message;
+  const ReceivedMessageItem(this.message, {super.key});
+
+  @override
+  State<ReceivedMessageItem> createState() => _ReceivedMessageItemState();
+}
+
+class _ReceivedMessageItemState extends State<ReceivedMessageItem> {
+  late final Message message;
+
+  @override
+  void initState() {
+    message = widget.message;
+    super.initState();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: lightGrey,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text('${message.text}   ${message.time} ',
+              style: const TextStyle(color: Colors.black)),
+        ));
   }
 }
