@@ -5,12 +5,15 @@ class User {
   final String name;
   final String surname;
   final bool online;
+  final String avatar;
 
   const User(
       {required this.id,
       required this.name,
       required this.surname,
-      required this.online});
+      required this.online,
+      required this.avatar
+      });
 
   factory User.fromFirebase(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -19,6 +22,7 @@ class User {
       name: data['name'] ?? '',
       surname: data['surname'] ?? '',
       online: data['online'],
+      avatar: data['avatar'] ?? '',
     );
   }
 }

@@ -207,17 +207,23 @@ class _ChatListItemState extends State<ChatListItem> {
                       width: 60,
                       margin: const EdgeInsets.only(right: 10),
                       alignment: Alignment.center,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topRight,
                             end: Alignment.bottomLeft,
-                            colors: [
+                            colors: (chatUser.avatar == 'green') ? [
                               darkGreenGradient,
                               lightGreenGradient,
+                            ] : (chatUser.avatar == 'blue') ? [
+                              darkBlueGradient,
+                              lightBlueGradient,
+                            ] : [
+                              darkRedGradient,
+                              lightRedGradient,
                             ],
                           ),
                           borderRadius:
-                              BorderRadius.all(Radius.circular(30.0))),
+                              const BorderRadius.all(Radius.circular(30.0))),
                       child: Text(
                         '${chatUser.name[0]}${chatUser.surname[0]}',
                         style: const TextStyle(
